@@ -32,7 +32,11 @@ def build_juicefs_query(doc_tag, data):
         "attributesToRetrieve": '["hierarchy.lvl0","hierarchy.lvl1","hierarchy.lvl2","hierarchy.lvl3","hierarchy.lvl4","hierarchy.lvl5","hierarchy.lvl6","content","type","url"]',
         "attributesToSnippet": '["hierarchy.lvl1:10","hierarchy.lvl2:10","hierarchy.lvl3:10","hierarchy.lvl4:10","hierarchy.lvl5:10","hierarchy.lvl6:10","content:10"]',
         "hitsPerPage": hitsPerPage,
-        "facetFilters": f'["language:{language}",["docusaurus_tag:{doc_tags[doc_tag]}"]]'
+        "facetFilters": f'["language:{language}",["docusaurus_tag:{doc_tags[doc_tag]}"]]',
+        "snippetEllipsisText": "…",
+        "advancedSyntax": "true",
+        "clickAnalytics": "false",
+        "analytics": "false",
     }
     encoded_params = urllib.parse.urlencode(params)
     req["params"] = encoded_params
@@ -52,13 +56,25 @@ def create_subtitle_chain(hit):
     lvl0 = hit.get("hierarchy").get("lvl0")
     lvl1 = hit.get("hierarchy").get("lvl1")
     lvl2 = hit.get("hierarchy").get("lvl2")
+    lvl3 = hit.get("hierarchy").get("lvl3")
+    lvl4 = hit.get("hierarchy").get("lvl4")
+    lvl5 = hit.get("hierarchy").get("lvl5")
+    lvl6 = hit.get("hierarchy").get("lvl6")
     if lvl0 is None:
         return ""
     if lvl1 is None:
         return f"{lvl0}"
     if lvl2 is None:
         return f"{lvl0}/{lvl1}"
-    return f"{lvl0}/{lvl1}/{lvl2}"
+    if lvl3 is None:
+        return f"{lvl0}/{lvl1}/{lvl2}"
+    if lvl4 is None:
+        return f"{lvl0}/{lvl1}/{lvl2}/{lvl3}"
+    if lvl5 is None:
+        return f"{lvl0}/{lvl1}/{lvl2}/{lvl3}/{lvl4}"
+    if lvl6 is None:
+        return f"{lvl0}/{lvl1}/{lvl2}/{lvl3}/{lvl4}/{lvl5}"
+    return f"{lvl0}/{lvl1}/{lvl2}/{lvl3}/{lvl4}/{lvl5}/{lvl6}"
 
 
 # Get query from Alfred
@@ -136,5 +152,5 @@ items["items"] = itemList
 # items["raw"] = raw
 items["query"] = alfredQuery
 items["doc"] = docTag
-items_json = json.dumps(items)
+items_json = json.dumps(items, indent=4)
 sys.stdout.write(items_json)
